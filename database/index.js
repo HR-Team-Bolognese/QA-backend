@@ -24,21 +24,75 @@ const getQuestions = (id, count = 5) => {
 
   // return pool.query('SELECT * FROM questions WHERE product_id = $1 AND reported = false LIMIT $2', [id, count])
 
-  return pool.query(`SELECT row_to_json(quest) as product_id
-  FROM(
-    SELECT q.id,
-    (SELECT json_agg(answ)
-    FROM(
-      SELECT * FROM answers WHERE questions_id = q.id
-    ) answ
-    ) as results
-    FROM questions as q) quest WHERE product_id = $1`, [id])
+  return pool.query(`SELECT row_to_json(quest)
+  from(
+    select product_id,
+    (
 
+
+        select json_agg(json_build_object('question_id', id, 'question_body', body, 'question_date', date, 'asker_name', asker_name, 'question_helpfulness', helpfulness, 'reported', reported, 'answers',
+        (
+          select  json_build_object(
+            id, json_build_object(
+              'id', id,
+              'body', body,
+              'date', date,
+              'answerer_name', answerer_name,
+              'helpfulness', helpfulness
+
+              )
+
+          )
+          from answers
+          where id = questions.id
+
+        )))
+
+
+        from questions
+        where product_id = $1
+
+    ) as results
+    from questions where product_id = $1
+  ) quest`, [id])
+
+
+  // return pool.query(`SELECT row_to_json(quest)
+  // from(
+  //   select product_id,
+  //   (
+  //     select json_agg(quest)
+  //     from (
+  //       select json_build_object('question_id', id, 'question_body', body, 'question_date', date, 'asker_name', asker_name, 'question_helpfulness', helpfulness, 'reported', reported, 'answers',
+  //       (
+  //         select  json_build_object(
+  //           id, json_build_object(
+  //             'id', id,
+  //             'body', body,
+  //             'date', date,
+  //             'answerer_name', answerer_name,
+  //             'helpfulness', helpfulness
+
+  //             )
+
+  //         )
+  //         from answers
+  //         where id = questions.id
+
+  //       ))
+
+
+  //       from questions
+  //       where product_id = $1
+  //     ) quest
+  //   ) as results
+  //   from questions where product_id = $1
+  // ) quest`, [id])
 };
 
 //TODO refactor to return a json object in the correct format
 const getAnswers = (id, count = 5) => {
-
+  let
   return pool.query('SELECT * FROM answers WHERE questions_id = $1 AND reported = false LIMIT $2', [id, count] )
 
 

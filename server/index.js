@@ -11,8 +11,8 @@ app.get('/qa/questions', (req, res) => {
   let count = req.query.count;
   db.getQuestions(product_id, count)
     .then((data) => {
-      console.log('data in server get', data.rows);
-      res.send(data.rows);
+      console.log('data in server get', data.rows[0].row_to_json);
+      res.send(data.rows[0].row_to_json);
     })
     .catch((err) => {
       console.log('error in server get', err);
