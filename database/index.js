@@ -28,30 +28,30 @@ const getQuestions = (id, count = 5) => {
   from(
     select product_id,
     (
-
-
-        select json_agg(json_build_object('question_id', id, 'question_body', body, 'question_date', date, 'asker_name', asker_name, 'question_helpfulness', helpfulness, 'reported', reported, 'answers',
-        (
-          select  json_build_object(
-            id, json_build_object(
-              'id', id,
-              'body', body,
-              'date', date,
-              'answerer_name', answerer_name,
-              'helpfulness', helpfulness
-
+      select json_agg(json_build_object('question_id', id, 'question_body', body, 'question_date', date, 'asker_name', asker_name, 'question_helpfulness', helpfulness, 'reported', reported, 'answers',
+      (
+        select json_build_object(
+          id, json_build_object(
+            'id', id,
+            'body', body,
+            'date', date,
+            'answerer_name', answerer_name,
+            'helpfulness', helpfulness,
+            'photos',
+            (
+              json_build_array
+              (
+                (select url from photos where answers_id = answers.id)
               )
-
-          )
-          from answers
-          where id = questions.id
-
-        )))
-
-
-        from questions
-        where product_id = $1
-
+            )
+            )
+        )
+      from answers
+      where id = questions.id
+      )
+    ))
+    from questions
+    where product_id = $1
     ) as results
     from questions where product_id = $1
   ) quest`, [id])
