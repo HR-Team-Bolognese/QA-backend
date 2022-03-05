@@ -19,8 +19,6 @@ pool.connect()
 
 //TODO refactor return a json object in the correct format
 const getQuestions = (id, count = 5) => {
-  // const text = `SELECT * FROM questions WHERE product_id = $1`
-  // const values = [id, count]
 
   // return pool.query('SELECT * FROM questions WHERE product_id = $1 AND reported = false LIMIT $2', [id, count])
 
@@ -28,9 +26,9 @@ const getQuestions = (id, count = 5) => {
   from(
     select product_id,
     (
-      select json_agg(json_build_object('question_id', id, 'question_body', body, 'question_date', date, 'asker_name', asker_name, 'question_helpfulness', helpfulness, 'reported', reported, 'answers',
+      select json_agg(json_build_object('question_id', questions.id, 'question_body', body, 'question_date', date, 'asker_name', asker_name, 'question_helpfulness', helpfulness, 'reported', reported, 'answers',
       (
-        select json_build_object(
+        select json_object_agg(
           id, json_build_object(
             'id', id,
             'body', body,
@@ -44,59 +42,52 @@ const getQuestions = (id, count = 5) => {
                 (select url from photos where answers_id = answers.id)
               )
             )
-            )
+          )
         )
       from answers
-      where id = questions.id
+      where questions_id = questions.id
       )
     ))
     from questions
-    where product_id = $1
+    where product_id = $1 AND reported = false LIMIT $2
     ) as results
     from questions where product_id = $1
-  ) quest`, [id])
+  ) quest`, [id, count])
 
-
-  // return pool.query(`SELECT row_to_json(quest)
-  // from(
-  //   select product_id,
-  //   (
-  //     select json_agg(quest)
-  //     from (
-  //       select json_build_object('question_id', id, 'question_body', body, 'question_date', date, 'asker_name', asker_name, 'question_helpfulness', helpfulness, 'reported', reported, 'answers',
-  //       (
-  //         select  json_build_object(
-  //           id, json_build_object(
-  //             'id', id,
-  //             'body', body,
-  //             'date', date,
-  //             'answerer_name', answerer_name,
-  //             'helpfulness', helpfulness
-
-  //             )
-
-  //         )
-  //         from answers
-  //         where id = questions.id
-
-  //       ))
-
-
-  //       from questions
-  //       where product_id = $1
-  //     ) quest
-  //   ) as results
-  //   from questions where product_id = $1
-  // ) quest`, [id])
 };
 
 //TODO refactor to return a json object in the correct format
-const getAnswers = (id, count = 5) => {
-  let
-  return pool.query('SELECT * FROM answers WHERE questions_id = $1 AND reported = false LIMIT $2', [id, count] )
+const getAnswers = (id, count = 5, page = 0) => {
 
+  // return pool.query('SELECT * FROM answers WHERE questions_id = $1 AND reported = false LIMIT $2', [id, count] )
 
-  // return pool.query('SELECT row_to_json(quest) as questions FROM(SELECT ) quest')
+  return pool.query(`SELECT json_build_object(
+    'question', id,
+    'page', ${page},
+    'count', ${count},
+    'results',
+    (select json_agg(
+      json_build_object(
+        'answer_id', id,
+        'body', body,
+        'date', date,
+        'answerer_name', answerer_name,
+        'helpfulness', helpfulness,
+        'photos',
+        (select json_agg(
+          json_build_object(
+            'id', id,
+            'url', url
+          )
+        ) from photos
+        where answers_id = answers.id
+        )
+        )
+    ) as results
+    from answers
+    where questions_id = questions.id
+    )
+  ) from questions where id = $1`, [id])
 
 
 }

@@ -27,10 +27,10 @@ app.get('/qa/questions/:question_id/answers', (req, res) => {
   db.getAnswers(question_id, count)
     .then((data) => {
       // console.log('data in answer get server', data.rows)
-      res.send(data.rows).status(200)
+      res.send(data.rows[0].json_build_object).status(200)
     })
     .catch((err) => {
-      // console.log('error in server answer get', err);
+      console.log('error in server answer get', err);
       res.sendStatus(418);
     })
 });
