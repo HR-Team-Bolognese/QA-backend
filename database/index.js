@@ -22,15 +22,29 @@ const getQuestions = (id, count = 5) => {
   // const text = `SELECT * FROM questions WHERE product_id = $1`
   // const values = [id, count]
 
-  return pool.query('SELECT * FROM questions WHERE product_id = $1 AND reported = false LIMIT $2', [id, count])
+  // return pool.query('SELECT * FROM questions WHERE product_id = $1 AND reported = false LIMIT $2', [id, count])
 
-  // return pool.query('SELECT row_to_json(questions) as questions  FROM( SELECT questions.product_id, (SELECT json_agg(answers) FROM(SELECT * FROM answers WHERE questions_id = questions.id) answers) as answers FROM questions as questions) questions)')
+  return pool.query(`SELECT row_to_json(quest) as product_id
+  FROM(
+    SELECT q.id,
+    (SELECT json_agg(answ)
+    FROM(
+      SELECT * FROM answers WHERE questions_id = q.id
+    ) answ
+    ) as results
+    FROM questions as q) quest WHERE product_id = $1`, [id])
 
 };
 
 //TODO refactor to return a json object in the correct format
 const getAnswers = (id, count = 5) => {
-  return pool.query('SELECT * FROM answers WHERE questions_id = $1 LIMIT $2', [id, count] )
+
+  return pool.query('SELECT * FROM answers WHERE questions_id = $1 AND reported = false LIMIT $2', [id, count] )
+
+
+  // return pool.query('SELECT row_to_json(quest) as questions FROM(SELECT ) quest')
+
+
 }
 
 const addQuestion = (question) => {
@@ -42,25 +56,34 @@ const addQuestion = (question) => {
 const addAnswer = (questionid, newanswer) => {
   const values = [questionid, newanswer.body, newanswer.name, newanswer.email, new Date().toISOString()]
 
-  //insert answer to answer table then get the answer id somehow and use that ti insert photos into photos table
   return pool.query('INSERT INTO answers(questions_id, body, answerer_name, email, reported, helpfulness, date) VALUES($1, $2, $3, $4, false, 0, $5) RETURNING id', values)
 
 }
 
-const addPhotos = (answerId, newanswer) => {
-  //for each url, gener
-  // let values = [answerId];
-  // newanswer.photos.forEach((photo) => {
-  //   values.push(photo);
-  // })
-  // return pool.query('INSERT INTO photos(answers_id, url) VALUES($1, $2), ($1, $3), ($1, $4),($1, $5), ($1, $6)', values)
+const addPhotos = async (answerId, newanswer) => {
 
-  return newanswer.photos.map((photo) => {
+  await newanswer.photos.forEach((photo) => {
     let values = [answerId];
     values.push(photo);
-    pool.query('INSERT INTO photos(answers_id, url) VALUES($1, $2)', values)
+    return pool.query('INSERT INTO photos(answers_id, url) VALUES($1, $2)', values)
   })
+
 }
+
+const markHelful = async (table, id) => {
+
+  await table === 'questions' ?
+  pool.query('UPDATE questions SET helpfulness = helpfulness + 1 WHERE id = $1', [id])
+  : pool.query('UPDATE answers SET helpfulness = helpfulness + 1 WHERE id = $1', [id])
+}
+
+const report = async (table, id) => {
+
+  await table === 'questions' ?
+  pool.query('UPDATE questions SET reported = true WHERE id = $1', [id])
+  : pool.query('UPDATE answers SET reported = true WHERE id = $1', [id])
+}
+
 
 module.exports = {
   // pool: pool,
@@ -68,5 +91,7 @@ module.exports = {
   getAnswers: getAnswers,
   addQuestion: addQuestion,
   addAnswer: addAnswer,
-  addPhotos: addPhotos
+  addPhotos: addPhotos,
+  markHelful: markHelful,
+  report: report
 }
