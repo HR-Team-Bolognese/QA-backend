@@ -49,10 +49,10 @@ const getQuestions = (id, count = 5) => {
       )
     ))
     from questions
-    where product_id = $1 AND reported = false LIMIT $2
+    where product_id = $1 AND reported = false LIMIT ${count}
     ) as results
     from questions where product_id = $1
-  ) quest`, [id, count])
+  ) quest limit ${count}`, [id])
 
 };
 
@@ -89,7 +89,7 @@ const getAnswers = (id, count = 5, page = 0) => {
     from answers
     where questions_id = questions.id
     )
-  ) from questions where id = $1`, [id])
+  ) from questions where id = $1 `, [id])
 
 
 }
