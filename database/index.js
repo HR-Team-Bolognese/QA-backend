@@ -61,28 +61,30 @@ const getAnswers = (id, count = 5, page = 0) => {
 
   // return pool.query('SELECT * FROM answers WHERE questions_id = $1 AND reported = false LIMIT $2', [id, count] )
 
-  return pool.query(`SELECT json_build_object(
+  return pool.query(`
+  SELECT json_build_object(
     'question', id,
     'page', ${page},
     'count', ${count},
     'results',
-    (select json_agg(
-      json_build_object(
-        'answer_id', id,
-        'body', body,
-        'date', date,
-        'answerer_name', answerer_name,
-        'helpfulness', helpfulness,
-        'photos',
-        (select json_agg(
-          json_build_object(
-            'id', id,
-            'url', url
-          )
-        ) from photos
-        where answers_id = answers.id
+    (
+      select json_agg(
+        json_build_object(
+          'answer_id', id,
+          'body', body,
+          'date', date,
+          'answerer_name', answerer_name,
+          'helpfulness', helpfulness,
+          'photos',
+          (select json_agg(
+            json_build_object(
+              'id', id,
+              'url', url
+            )
+          ) from photos
+          where answers_id = answers.id
         )
-        )
+      )
     ) as results
     from answers
     where questions_id = questions.id

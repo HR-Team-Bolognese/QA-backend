@@ -8,3 +8,6 @@ CREATE TABLE questions (
   reported boolean not null,
   helpfulness int not null
 );
+
+CREATE INDEX product_id
+ON questions (product_id);

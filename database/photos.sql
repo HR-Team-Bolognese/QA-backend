@@ -4,3 +4,5 @@ CREATE TABLE photos (
   url varchar(250)
 )
 
+CREATE INDEX answers_id
+ON photos (answers_id);

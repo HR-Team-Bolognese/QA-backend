@@ -8,3 +8,6 @@ CREATE TABLE answers (
   reported boolean not null,
   helpfulness int not null
 )
+
+CREATE INDEX questions_id
+ON answers (questions_id);
