@@ -18,7 +18,7 @@ pool.connect()
   })
 
 //TODO refactor return a json object in the correct format
-const getQuestions = (id, count = 5) => {
+const getQuestions = (id, count = 5, page = 5) => {
 
   // return pool.query('SELECT * FROM questions WHERE product_id = $1 AND reported = false LIMIT $2', [id, count])
 
@@ -49,10 +49,10 @@ const getQuestions = (id, count = 5) => {
       )
     ))
     from questions
-    where product_id = $1 AND reported = false LIMIT ${count}
+    where product_id = $1  AND reported = false
     ) as results
     from questions where product_id = $1
-  ) quest limit ${count}`, [id])
+  ) quest `, [id])
 
 };
 

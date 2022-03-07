@@ -9,10 +9,13 @@ app.use(express.json());
 app.get('/qa/questions', (req, res) => {
   let product_id = req.query.product_id;
   let count = req.query.count;
+  // console.log('count',  count)
+  // console.log('page', req.query.page)
+  let page = req.query.page
   db.getQuestions(product_id, count)
     .then((data) => {
       console.log('data in server get', data.rows[0].row_to_json);
-      res.send(data.rows[0].row_to_json);
+      res.status(200).send(data.rows[0].row_to_json);
     })
     .catch((err) => {
       console.log('error in server get', err);
@@ -24,7 +27,8 @@ app.get('/qa/questions/:question_id/answers', (req, res) => {
   // console.log('answers server', req.params)
   let question_id = req.params.question_id;
   let count = req.query.count;
-  db.getAnswers(question_id, count)
+  let page = req.query.page
+  db.getAnswers(question_id, count, page)
     .then((data) => {
       // console.log('data in answer get server', data.rows)
       res.send(data.rows[0].json_build_object).status(200)
@@ -56,7 +60,7 @@ app.post('/qa/questions/:question_id/answers', (req, res) => {
         const answerId = Number(data.rows[0].id);
         db.addPhotos(answerId, newanswer)
           .then(() => {
-            res.status(200).send('Success adding photo to database');
+            res.status(201).send('Success adding photo to database');
           })
           .catch((err) => {
             res.status(400).send('Error adding photos to database');
