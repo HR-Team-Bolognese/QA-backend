@@ -52,6 +52,7 @@ app.post('/qa/questions', (req, res) => {
 
 app.post('/qa/questions/:question_id/answers', (req, res) => {
   let newanswer = req.body;
+  // console.log('req.body', req.body)
   let questionid = Number(req.params.question_id);
 
   db.addAnswer(questionid, newanswer)
@@ -112,7 +113,7 @@ app.put('/qa/answers/:answer_id/helpful', (req, res) => {
 
 app.put('/qa/answers/:answer_id/report', (req, res) => {
   let id = Number(req.params.answer_id);
-  console.log('param', req.params)
+  // console.log('param', req.params)
   db.report('answers', id)
     .then(() => {
       res.send('Success reporting question!').status(200)
