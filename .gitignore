@@ -3,3 +3,5 @@ node_modules
 config.js
 
 .DS_Store
+
+qaapi_backup.sql

@@ -36,11 +36,8 @@ const getQuestions = (id, count = 5, page = 5) => {
             'answerer_name', answerer_name,
             'helpfulness', helpfulness,
             'photos',
-            (
-              json_build_array
-              (
-                (select url from photos where answers_id = answers.id)
-              )
+            (select array
+              (select url from photos where answers_id = answers.id)
             )
           )
         )

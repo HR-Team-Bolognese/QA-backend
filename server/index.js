@@ -12,10 +12,11 @@ app.get('/qa/questions', (req, res) => {
   // console.log('count',  count)
   // console.log('page', req.query.page)
   let page = req.query.page
-  db.getQuestions(product_id, count)
+  db.getQuestions(product_id, count, page)
     .then((data) => {
-      console.log('data in server get', data.rows[0].row_to_json);
-      res.status(200).send(data.rows[0].row_to_json);
+      // console.log('data in server get', data.rows[0].row_to_json);
+      let response =  !data.rows.length ? data.rows : data.rows[0].row_to_json;
+      res.status(200).send(response);
     })
     .catch((err) => {
       console.log('error in server get', err);
@@ -43,6 +44,7 @@ app.post('/qa/questions', (req, res) => {
   let newquestion = req.body;
   db.addQuestion(newquestion)
     .then((data) => {
+      console.log('new question', req.body)
       res.status(201).send('Success posting question!');
     })
     .catch((err) => {
