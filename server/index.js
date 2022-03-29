@@ -2,20 +2,16 @@ const express = require('express');
 const app = express();
 const db = require('../database/index.js');
 
-//path may not be right
 app.use(express.static(__dirname + './../public'))
 app.use(express.json());
 
 app.get('/qa/questions', (req, res) => {
   let product_id = req.query.product_id;
   let count = req.query.count;
-  // console.log('count',  count)
-  // console.log('page', req.query.page)
   let page = req.query.page
   db.getQuestions(product_id, count, page)
     .then((data) => {
-      // console.log('data in server get', data.rows[0].row_to_json);
-      let response =  !data.rows.length ? data.rows : data.rows[0].row_to_json;
+      let response = !data.rows.length ? data.rows : data.rows[0].row_to_json;
       res.status(200).send(response);
     })
     .catch((err) => {
@@ -25,13 +21,11 @@ app.get('/qa/questions', (req, res) => {
 });
 
 app.get('/qa/questions/:question_id/answers', (req, res) => {
-  // console.log('answers server', req.params)
   let question_id = req.params.question_id;
   let count = req.query.count;
   let page = req.query.page
   db.getAnswers(question_id, count, page)
     .then((data) => {
-      // console.log('data in answer get server', data.rows)
       res.send(data.rows[0].json_build_object).status(200)
     })
     .catch((err) => {
@@ -54,7 +48,6 @@ app.post('/qa/questions', (req, res) => {
 
 app.post('/qa/questions/:question_id/answers', (req, res) => {
   let newanswer = req.body;
-  // console.log('req.body', req.body)
   let questionid = Number(req.params.question_id);
 
   db.addAnswer(questionid, newanswer)
@@ -115,7 +108,6 @@ app.put('/qa/answers/:answer_id/helpful', (req, res) => {
 
 app.put('/qa/answers/:answer_id/report', (req, res) => {
   let id = Number(req.params.answer_id);
-  // console.log('param', req.params)
   db.report('answers', id)
     .then(() => {
       res.send('Success reporting question!').status(200)
