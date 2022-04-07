@@ -47,6 +47,14 @@ Set up a config.js with the following:
 
 *  password for database
 
+## Images
+
+# Final Test, 2500 Requests per second 
+![](https://i.imgur.com/b9169Y5.png)
+
+# PostgreSQL Nested Queries
+![](https://i.imgur.com/Eq7VgJ3.png)
+
 ### System Architecture
 NGINX is used with the method least connected to distribute requests between three servers.
 ![](https://i.imgur.com/4gPvHHH.png)
